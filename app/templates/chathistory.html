@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+  body,
+  html {
+    height: 100%;
+    margin: 0;
+  }
+
+  .history-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .messages-list {
+    padding-left: 0;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .message-box {
+    margin-bottom: 15px;
+    list-style: none;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .message {
+    margin-bottom: 10px;
+  }
+
+  .message-text {
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .sent {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+  }
+
+  .received {
+    background-color: #f1f0f0;
+    align-self: flex-start;
+  }
+
+  .navbarr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .timestamp {
+    font-size: 0.8em;
+    color: #888;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+  <div class="card flex-grow-1">
+    <div class="card-header bg-primary text-white navbarr">
+      <span>Chat History</span>
+      <form method="POST" action="{% url 'delete_history' %}" style="margin: 0;" id="delete-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm" id="delete-button">Delete History</button>
+      </form>
+    </div>
+    <a class="" href="{% url 'chatbot' %}">Chat</a>
+    <div class="card-body messages-list">
+      <ul class="list-unstyled">
+        {% for chat in chats %}
+        {% if chat.user == request.user %}
+        <li class="message-box sent">
+          <div class="message">
+            <div class="message-text">
+              <div class="message-sender">
+                <b>You</b>
+              </div>
+              <div class="message-content">
+                {{ chat.message }}
+              </div>
+              <div class="timestamp">
+                {{ chat.created_at|date:"F j, Y, g:i a" }}
+              </div>
+            </div>
+          </div>
+          {% if chat.response %}
+          <div class="message received">
+            <div class="message-text">
+              <div class="message-sender">
+                <b>AI Chatbot</b>
+              </div>
+              <div class="message-content">
+                {{ chat.response }}
+              </div>
+              <div class="timestamp">
+                {{ chat.created_at|date:"F j, Y, g:i a" }}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('delete-button').addEventListener('click', function(event) {
+  if (!confirm('Are you sure you want to delete the chat history?')) {
+    event.preventDefault();
+  }
+});
+</script>
+{% endblock %}
